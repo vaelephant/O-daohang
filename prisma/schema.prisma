@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  username   String    @unique
+  password   String
+  email      String    @unique
+  createdAt  DateTime  @default(now())
+  datasets   Dataset[]
+  transactions Transaction[]
+}
+
+model Dataset {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  size        BigInt
+  price       Float
+  category    String?
+  createdAt   DateTime  @default(now())
+  uploadedBy  Int
+  user        User      @relation(fields: [uploadedBy], references: [id])
+  transactions Transaction[]
+  modelPerformances ModelPerformance[]
+}
+
+model Transaction {
+  id              Int       @id @default(autoincrement())
+  userId          Int
+  datasetId       Int
+  transactionDate DateTime  @default(now())
+  amount          Float
+  user            User      @relation(fields: [userId], references: [id])
+  dataset         Dataset   @relation(fields: [datasetId], references: [id])
+}
+
+model ModelPerformance {
+  id                Int       @id @default(autoincrement())
+  datasetId         Int
+  modelName         String
+  performanceMetric String
+  value             Float
+  evaluatedAt       DateTime  @default(now())
+  dataset           Dataset   @relation(fields: [datasetId], references: [id])
+}
